@@ -1,0 +1,107 @@
+<!doctype html>
+<!--
+Created using JS Bin
+http://bin.webduino.io
+
+Copyright (c) 2019 by anonymous (http://bin.webduino.io/tules/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Webduino Blockly Demo 08</title>
+  <script src="https://blocklypro.webduino.io/node_modules/rtc-session/lib/RTCMultiConnection.min.js?rev=cc61fa5179113aaf45cc0e7ffcb841db"></script>
+  <script src="https://blocklypro.webduino.io/node_modules/rtc-session/lib/RTCSession.js?rev=aebe9605ee277a1130f5c0965d759932"></script>
+  <script src="https://blocklypro.webduino.io/node_modules/jquery/dist/jquery.min.js?rev=2f6b11a7e914718e0290410e85366fe9"></script>
+  <script src="https://blocklypro.webduino.io/dist/lib/webduino-all-0.4.20.min.js?rev=4426739c00d85325cb2d3d701fa50666"></script>
+  <script src="https://blocklypro.webduino.io/dist/webduino-blockly.min.js?rev=736fa9a2fba9fa461db7c329f6651493"></script>
+  <script src="https://blocklypro.webduino.io/dist/lib/runtime.min.js?rev=683a69503433786202911b4d9f766100"></script>
+  <script src="https://blocklypro.webduino.io/dist/lib/tracking.min.js?rev=cf9a4fdf0a7c4c61ba52ce231ec7f12a"></script>
+  <script src="https://blocklypro.webduino.io/dist/lib/face.min.js?rev=310481028677e46ed516261b124ccda2"></script>
+  <script src="https://blocklypro.webduino.io/dist/api.min.js?rev=5d7294d5d712baa3f21324dfe1199f0f"></script>
+<style id="jsbin-css">
+#demo-area-08-content {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  height: 200px;
+  pointer-events: auto!important;
+}
+
+#demo-area-08-video {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#demo-area-08-canvas {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+</style>
+</head>
+
+<body>
+  <div>
+    <div id="demo-area-08-content">
+      <video id="demo-area-08-video" preload="" autoplay="" loop="" muted="" controls=""></video>
+      <canvas id="demo-area-08-canvas"></canvas>
+    </div>
+  </div>
+<script id="jsbin-javascript">
+var track;
+var _E8_AA_AA_E6_98_8E;
+
+
+track = {};
+track.canvas = document.getElementById('demo-area-08-canvas');
+track.context = track.canvas.getContext('2d');
+track.myTracker = new tracking.ObjectTracker('face');
+track.myTracker.setInitialScale(4);
+track.myTracker.setStepSize(0.5);
+track.myTracker.setEdgesDensity(0.1);
+
+track.myTracker.on('track', function(event) {
+  if (event.data.length === 0) {
+    track.context.clearRect(0, 0, track.canvas.width, track.canvas.height);
+      _E8_AA_AA_E6_98_8E = '要關掉程式，先遮掉攝影機，把跳出視窗關掉，就可以關閉程式了。';
+
+  } else {
+    track.context.clearRect(0, 0, track.canvas.width, track.canvas.height);
+    event.data.forEach(function(data) {
+      window.alert(String(['座標(',data.x,'，',data.y,')----'].join('')) + String(['大小(',data.width,'，',data.height,')'].join('')));
+      if(data.color){
+        track.context.strokeStyle = track.storkColor[data.color];
+      }else{
+        track.context.strokeStyle = '#f00';
+      }
+      track.context.lineWidth = 5;
+      track.context.strokeRect(data.x, data.y, data.width, data.height-30);
+      track.context.font = '11px Helvetica';
+      track.context.fillStyle = '#fff';
+    });
+  }
+});
+if (webRTC.enable) {
+ webRTC.ready(function () {
+  track.trackerTask = tracking.track('#demo-area-08-video', track.myTracker, {
+    camera: false
+  });
+ });
+} else {
+  track.trackerTask = tracking.track('#demo-area-08-video', track.myTracker, {
+    camera: true
+  });
+}
+
+</script>
+</body>

@@ -1,0 +1,36 @@
+
+
+
+<script>
+ //get the parameter if needed
+  var strUrl = location.search;
+  var getPara, ParaVal;
+  var aryPara = [];
+  var boardinfo='';
+  var boardname;
+  var devicecode;
+
+  if (strUrl.indexOf("?") != -1) {
+    var getSearch = strUrl.split("?");
+    getPara = getSearch[1].split("&");
+	
+	if(getPara.length==6){nextitem=0;}//第6組參數是要不要念下一題
+	
+    for (i = 0; i < getPara.length; i++) {
+      ParaVal = getPara[i].split("=");
+      aryPara.push(ParaVal[0]);
+	  aryPara.push(ParaVal[1]);
+    }
+	boardname=aryPara[1];// smart, fly , 馬克1號
+	devicecode=aryPara[3]; //device id
+    
+	}
+	//取用boardinfo 填入你的boardReady()的第一個參數
+	if(boardname=='smart'){
+		boardinfo={board: 'Smart', device: devicecode, transport: 'mqtt'};
+	}else{
+		boardinfo={device: devicecode};
+	}
+	alert(devicecode);
+
+</script>

@@ -1,0 +1,191 @@
+<!doctype html>
+<!--
+Created using JS Bin
+http://bin.webduino.io
+
+Copyright (c) 2019 by anonymous (http://bin.webduino.io/qopaq/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Fenduino on Webduino</title>
+  <script src="https://blocklypro.webduino.io/node_modules/jquery/dist/jquery.min.js?rev=2f6b11a7e914718e0290410e85366fe9"></script>
+  <script src="https://blocklypro.webduino.io/dist/lib/webduino-all-0.4.20.min.js?rev=4426739c00d85325cb2d3d701fa50666"></script>
+  <script src="https://blocklypro.webduino.io/dist/webduino-blockly.min.js?rev=736fa9a2fba9fa461db7c329f6651493"></script>
+  <script src="https://blocklypro.webduino.io/dist/lib/firebase.min.js?rev=c0bfd493efd477d098a4ae9e92b13880"></script>
+  <script src="https://blocklypro.webduino.io/dist/lib/runtime.min.js?rev=683a69503433786202911b4d9f766100"></script>
+<style id="jsbin-css">
+#showcontent { font-size: 60px; pointer-events: auto!important; }
+</style>
+</head>
+
+<body>
+  <div><span id="showcontent">剪刀石頭布之來猜拳</span></div>
+<script id="jsbin-javascript">
+(async function () {
+
+var numx;
+var right;
+var scissor;
+var data;
+var stone;
+var questionnum;
+var paper;
+var itemnum;
+var j;
+var i;
+var useranswer;
+var randomnum;
+var answerindex;
+var speakitems;
+var answertime;
+var speed;
+
+function setupvar() {
+  numx = ['第一題','第二題','第三題','第四題','第五題'].join('');
+  data = ['剪刀', '石頭', '布'];
+  questionnum = 3;
+  itemnum = 2;
+  randomnum = [];
+  speakitems = '';
+  answertime = 5;
+  speed=1;
+}
+
+async function showresult() {
+  right = false;
+  if (useranswer.length == randomnum.length) {
+    right = true;
+    var j_end = useranswer.length;
+    var j_inc = 1;
+    if (1 > j_end) {
+      j_inc = -j_inc;
+    }
+    for (j = 1;
+         j_inc >= 0 ? j <= j_end : j >= j_end;
+         j += j_inc) {
+      if (useranswer[j - 1] > randomnum[j - 1] && useranswer[j - 1] - randomnum[j - 1] == 1) {
+        right = true;
+      } else if (useranswer[j - 1] < randomnum[j - 1] && (useranswer[j - 1] + 3) - randomnum[j - 1] == 1) {
+        right = true;
+      } else {
+        right = false;
+      }
+    }
+  }
+  if (right) {
+    document.getElementById('showcontent').innerHTML = '你贏了';
+  } else {
+    document.getElementById('showcontent').innerHTML = '你沒贏';
+  }
+  await delay(2);
+  randomnum = [];
+  speakitems = '';
+  useranswer = [];
+  answerindex = 1;
+  speak('下一題');
+  await delay(2);
+}
+
+function math_random_int(a, b) {
+  if (a > b) {
+    // Swap a and b to ensure a is smaller.
+    var c = a;
+    a = b;
+    b = c;
+  }
+  return Math.floor(Math.random() * (b - a + 1) + a);
+}
+
+async function showitems() {
+  //get the parameter if needed
+  var strUrl = location.search;
+  var getPara, ParaVal;
+  var aryPara = [];
+
+  if (strUrl.indexOf("?") != -1) {
+    var getSearch = strUrl.split("?");
+    getPara = getSearch[1].split("&");
+    for (i = 0; i < getPara.length; i++) {
+      ParaVal = getPara[i].split("=");
+      aryPara.push(ParaVal[0]);
+	  aryPara.push(ParaVal[1]);
+    }
+	
+    itemnum=parseInt(aryPara[1]);
+	answertime=parseInt(aryPara[3]);
+    speed=parseFloat(aryPara[5]);
+	//念太慢，拖掉了時間，補回時間
+	if(speed<1){
+	answertime=answertime/speed;
+	}
+	//alert(itemnum);
+  }
+
+
+
+  speak('開始出題', ["zh-TW",1,2,0.7]);
+  await delay(2);
+  while (true) {
+    var i_inc = 1;
+    if (1 > itemnum) {
+      i_inc = -i_inc;
+    }
+    for (i = 1;
+         i_inc >= 0 ? i <= itemnum : i >= itemnum;
+         i += i_inc) {
+      randomnum[i - 1] = math_random_int(1, data.length);
+    }
+    var i_inc2 = 1;
+    if (1 > itemnum) {
+      i_inc2 = -i_inc2;
+    }
+    for (i = 1;
+         i_inc2 >= 0 ? i <= itemnum : i >= itemnum;
+         i += i_inc2) {
+      speakitems = String(speakitems) + String(data[randomnum[i - 1] - 1]);
+    }
+    await delay(1);
+    document.getElementById('showcontent').innerHTML = speakitems;
+    speak(speakitems,["zh-TW",1,2,speed], async function () {
+
+    },0);
+    await delay(answertime);
+    document.getElementById('showcontent').innerHTML = '時間到';
+    await delay(1);
+    await showresult();
+  }
+}
+
+
+boardReady({board: 'Smart', device: '10yRgYBV', transport: 'mqtt'}, async function (board) {
+  board.samplingInterval = 50;
+  setupvar();
+  scissor = getButton(board, 2);
+  stone = getButton(board, 5);
+  paper = getButton(board, 14);
+  useranswer = [];
+  answerindex = 1;
+  scissor.on('pressed', async function () {
+    useranswer[answerindex - 1] = 1;
+    answerindex = answerindex + 1;
+  });
+  stone.on('pressed', async function () {
+    useranswer[answerindex - 1] = 2;
+    answerindex = answerindex + 1;
+  });
+  paper.on('pressed', async function () {
+    useranswer[answerindex - 1] = 3;
+    answerindex = answerindex + 1;
+  });
+  showitems();
+});
+
+}());
+</script>
+</body>
